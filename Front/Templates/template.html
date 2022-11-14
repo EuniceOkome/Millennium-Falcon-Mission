@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:500&display=swap"
+    rel="stylesheet"/>
+  
+    <style type="text/css">
+    
+      body {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+      }
+    
+      .stretch {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+      }
+    
+      .centered {
+        position: absolute;
+        top: 7px;
+        left: 40%;
+      }
+   
+      #crawl h1 {
+        font-family: "Roboto";
+        font-size: 4rem;
+        letter-spacing: 0.09em;
+        position: absolute;
+        color: #f5c91c;
+        text-shadow: 1px 1px 1px red, 2px 2px 1px red, 3px 3px 1px red;
+      }
+    
+      .box1 {
+      position: absolute;
+      top: 250px;
+      left: 350px;
+      background-color: rgba(255,255,255, 0.5);
+      right: 350px;
+      height: 400px;
+      border-radius: 30px;
+      margin: 0 auto;
+      }  
+
+      #crawl p, ul {
+        ont-family: "Roboto";
+        font-size: 1rem;
+        letter-spacing: 0.07em;
+        position: static;
+        color: #f5c91c;
+        text-align: justify;
+        width: 95%;
+        margin: 10px;
+        top: 15px;
+        padding : 0;
+        line-height:30px;
+      }
+   
+    
+    </style>  
+    <title>C3PO</title>
+  </head>
+
+  <body>   
+  <canvas id="canvas" class="stretch"></canvas> 
+    <div id="crawl" class="centered" >
+    <h1>MISSION</h1>
+    </div>
+    
+    <div id="crawl" class="box1">
+      <p> Sir, may I suggest that you check the probability of success of our mission before embarking on an uncertain journey?
+      I just need to combine the information transmitted by the rebels about the bounty hunters with the one at my disposal. </p>
+      <form method="POST" action="" enctype="multipart/form-data">
+        <p><input type="file" name="file" accept=".json">
+        <input type="submit" value="Submit"></p>
+      </form>
+      <p>{% if boolean == True %}
+        {% if result == [0] %}
+          Well, unfortunately our countdown is too short to reach the rebels before the attack. We have 0% chance of success on this mission and have no choice but to abort it.
+        {% else %}
+          Thank you! If my calculations are accurate, and they are, we have {{result[0]}}% of chances to succeed this mission.
+        {% if result[1]|length >1 %}
+          Here are the possible routes:
+          {% for i in range(result[1]|length) %} 
+            <ul> route {{i+1}}:
+            {% for r in result[1][i] %}
+              {{r}}
+            {% endfor %}
+            </ul>
+          {% endfor %}
+        {% elif result[1]|length ==1 %}
+          Here is the route: 
+          <ul>
+          {% for r in result[1][0] %}
+            {{r}}
+          {% endfor %}
+          </ul>
+        {% endif %} 
+      {% endif %}    
+    {% endif %}</p>
+    </div>
+
+    <script>
+    const canvas = document.getElementById("canvas");
+    const c = canvas.getContext("2d");
+
+    let w;
+    let h;
+
+    const setCanvasExtents = () => {
+      w = document.body.clientWidth;
+      h = document.body.clientHeight;
+      canvas.width = w;
+      canvas.height = h;
+    };
+
+    setCanvasExtents();
+
+    window.onresize = () => {
+      setCanvasExtents();
+    };
+
+    const makeStars = count => {
+      const out = [];
+      for (let i = 0; i < count; i++) {
+        const s = {
+          x: Math.random() * 1600 - 800,
+          y: Math.random() * 900 - 450,
+          z: Math.random() * 1000
+        };
+        out.push(s);
+      }
+      return out;
+    };
+
+    let stars = makeStars(10000);
+
+    const clear = () => {
+      c.fillStyle = "black";
+      c.fillRect(0, 0, canvas.width, canvas.height);
+    };
+
+    const putPixel = (x, y, brightness) => {
+      const intensity = brightness * 255;
+      const rgb = "rgb(" + intensity + "," + intensity + "," + intensity + ")";
+      c.fillStyle = rgb;
+      c.fillRect(x, y, 1, 1);
+    };
+
+    const moveStars = distance => {
+      const count = stars.length;
+      for (var i = 0; i < count; i++) {
+        const s = stars[i];
+        s.z -= distance;
+        while (s.z <= 1) {
+          s.z += 1000;
+        }
+      }
+    };
+
+    let prevTime;
+    const init = time => {
+      prevTime = time;
+      requestAnimationFrame(tick);
+    };
+
+    const tick = time => {
+      let elapsed = time - prevTime;
+      prevTime = time;
+
+      moveStars(elapsed * 0.1);
+
+      clear();
+
+      const cx = w / 2;
+      const cy = h / 2;
+
+      const count = stars.length;
+      for (var i = 0; i < count; i++) {
+        const star = stars[i];
+
+        const x = cx + star.x / (star.z * 0.001);
+        const y = cy + star.y / (star.z * 0.001);
+
+        if (x < 0 || x >= w || y < 0 || y >= h) {
+          continue;
+        }
+
+        const d = star.z / 1000.0;
+        const b = 1 - d * d;
+
+        putPixel(x, y, b);
+      }
+
+      requestAnimationFrame(tick);
+    };
+
+    requestAnimationFrame(init);
+  </script>
+  </body>
+</html>
